@@ -83,6 +83,11 @@
                         "jsonpCallback": "svc_search_v2_articlesearch"
                     }).done(function(json) {
 
+                        /*  Let's spit the result set out to the console so that you can see
+                            the structure of it: */
+
+                        console.log("Returned object:", json);
+
                         /*  The AJAX call returns a response that is transformed into a JavaScript
                             object. The results are stored in a "docs" object, which is in turn in
                             a "response" object. So let's access it:
