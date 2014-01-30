@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Article search example</title>
+    </head>
+    <body>
+        <input type="text" id="txtSearchFor"/>
+        <button id="btnSearch">Search</button>
+        <ul id="ulSearchResults">
+        </ul>
+        <!-- Load jQuery -->
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script>
+            /*  IMPORTANT first note: you need to sign up for an API key in order to 
+                use NYT APIs. You can get one here:
+
+                http://developer.nytimes.com/apps/mykeys
+
+                you can store it in a variable here:
+
+            */
+
+            var nytApiKey = "<your api key here>"
+
+            /*
+                So what is jQuery? The short answer is that it's a collection of
+                utilities to make it easier to work with JavaScript. Once it's loaded,
+                it is available by using the $ character in your script. It has a ton
+                of documentation:
+
+                http://api.jquery.com/
+
+                Let's use it to power a search script.
+
+                First, let's write the function that will fetch our search results.
+
+                One of the most common uses of jQuery is as an element selector. We
+                select elements by using CSS selectors. If you don't know them, we only
+                need one to begin with:
+
+                $("#txtSearchFor")
+
+                A selector starting with # looks for an element by its ID. Each ID
+                should be used once per page. So, let's use jQuery's "on" function to
+                register what's called an event handler - some code we want to run when
+                the search button is clicked.
+            */
+
+            $("#btnSearch").on("click", function() {
+
+                // So, we've hooked onto the 'click' event, and the code within this function
+                // will run when the button is clicked.
+
+                // Let's grab the text typed into the search box and assign it to a variable:
+
+                var searchText = $("#txtSearchFor").val();
+
+                // What if the textbox is empty? Let's check for that and show an error
+                // if it is.
+
+                if (searchText == "") {
+                    
+                    alert("You didn't enter any text in the search box!");
+                
+                } else {
+
+                    /*  We're going to use the Times Article Search API. Documentation is available
+                        here:
+                        
+                        http://developer.nytimes.com/docs/read/article_search_api_v2
+
+                        We use jQuery to create an AJAX request to grab our data.
+
+                    */
+                    
+                    $.ajax({
+                        "url": "http://api.nytimes.com/svc/search/v2/articlesearch.jsonp",
+                        "data": {
+                            "q": searchText,
+                            "api-key": nytApiKey
+                        },
+                        "dataType": "jsonp",
+                        "jsonpCallback": "svc_search_v2_articlesearch"
+                    }).done(function(json) {
+
+                        /*  The AJAX call returns a response that is transformed into a JavaScript
+                            object. The results are stored in a "docs" object, which is in turn in
+                            a "response" object. So let's access it:
+                        */
+
+                        results = json.response.docs;
+
+                        /*  First thing we need to do is empty out any existing results */
+
+                        $("#ulSearchResults").empty();
+
+                        /*  Now let's do a for loop over the results */
+
+                        for (var x = 0; x < results.length; x++) {
+                            doc = results[x];
+
+                            /*  We create the new elements we want to add to the page. If we put a full
+                                tag in the $() (i.e. '<li/>' instead of 'li') it makes a new element
+                                instead of selecting an existing one.
+                             */
+                            var bulletPoint = $("<li/>");
+                            var link = $("<a/>");
+                            var paragraph = $("<p/>");
+
+
+                            /* Now we add the attributes we want to set */
+                            link.attr("href", doc.web_url);
+                            link.html(doc.headline.main);
+                            paragraph.html(doc.snippet);
+
+                            /* Then we add the link and the paragraph to our bullet */
+
+                            bulletPoint.append(link, paragraph);
+
+                            /* Then we add our bullet to the search results bullet list */
+
+                            $("#ulSearchResults").append(bulletPoint)
+                        }
+                    });
+
+
+                }
+            })
+
+
+
+
+
+        </script>
+    </body>
